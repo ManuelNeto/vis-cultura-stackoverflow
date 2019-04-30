@@ -1,0 +1,123 @@
+---
+title: "Analisando relaÃ§Ãµes"
+output:
+  html_document:
+    df_print: paged
+---
+Aluno: Manuel Severino da Silva Neto
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(viridis)
+source(here::here("code/import_data.R"))
+theme_set(theme_bw())
+
+knitr::opts_chunk$set(tidy = FALSE,
+                      fig.width = 6,
+                      fig.height = 5)
+```
+
+```{r read}
+dados = read_csv(
+    here::here("data/participation-per-country.csv"),
+    col_types = cols(
+        .default = col_double(),
+        site = col_character(),
+        country = col_character(),
+        geo = col_character(),
+        four_regions = col_character(),
+        eight_regions = col_character(),
+        six_regions = col_character(),
+        `World bank income group 2017` = col_character()
+    )
+) %>% 
+    filter(usuarios > 200)
+glimpse(dados)
+```
+
+## Examinando essa relação
+
+```{r}
+dados %>%
+      filter(!is.na(Internet), !is.na(PDI), !is.na(comentaram_prop), !is.na(usuarios)) %>% 
+      ggplot(
+          mapping = aes(
+              x = PDI, 
+              y = comentaram_prop, 
+              alpha = Internet,
+              size = usuarios
+              )) +
+      geom_point(color="#FF6347") +
+      labs(
+        title = "Relação entre a proporção das pessoas do país que comentou nas questões \nde outros e o quão hierárquicas são as relações em um país.",
+        subtitle = "",
+        x = "Proporção de comentários",
+        y = "PDI",
+        alpha = "Internet",
+        size = "Usuários"
+      ) +
+      
+      scale_x_continuous(trans="log10")
+
+```
+
+
+
+## Outras formas de ver
+
+
+```{r}
+dados %>%
+      filter(!is.na(Internet), !is.na(PDI), !is.na(comentaram_prop), !is.na(usuarios)) %>% 
+      ggplot(
+          mapping = aes(
+              x = PDI, 
+              y = comentaram_prop, 
+              colour = Internet,
+              size = usuarios
+              )) +
+      geom_point() +
+      
+      scale_y_continuous(trans="log10")+
+      scale_x_continuous(trans="log10")
+
+```
+```{r}
+
+dados %>%
+    ggplot(
+        mapping = aes(
+            x = usuarios, 
+            y = Internet, 
+            size = comentaram_prop, 
+            alpha = PDI 
+            )) +
+    geom_point(color = "#A9A9A9") + 
+    scale_x_continuous(labels = scales::comma)
+```
+
+
+```{r}
+dados %>%
+    ggplot(aes(
+        x = comentaram_prop,
+        y = PDI,
+        color = usuarios,
+        size = Internet
+    )) +
+    geom_point( alpha = 0.8)
+```
+
+
+```{r}
+dados %>%
+    ggplot(aes(
+        x = log10(usuarios),
+        y = comentaram_prop,
+        color = Internet,
+        size = PDI
+    )) +
+    geom_point( alpha = 0.8)
+```
+
